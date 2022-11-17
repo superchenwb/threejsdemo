@@ -248,6 +248,13 @@ var stats: any;
 function initStats() {
   stats = new Stats();
   document.body.appendChild(stats.dom);
+
+  return {
+    update: () => {
+      //更新性能插件
+      stats.update();
+    },
+  };
 }
 
 //用户交互插件 鼠标左键按住旋转，右键按住平移，滚轮缩放
@@ -353,9 +360,6 @@ function animate() {
   //更新控制器
   render();
 
-  //更新性能插件
-  stats.update();
-
   controls.update();
   updates.forEach((fn) => fn(timer));
 
@@ -400,7 +404,8 @@ async function draw() {
   initModel();
   initControls();
   if (process.env.NODE_ENV === 'development') {
-    initStats();
+    const { update } = initStats();
+    updates.push(update);
   }
 
   animate();
