@@ -79,14 +79,13 @@ function initGui() {
   document.addEventListener('pointermove', onPointerMove);
 }
 
-var ambientLight, spotLight;
 function initLight() {
   // 环境光
-  ambientLight = new THREE.AmbientLight('#111111');
+  const ambientLight = new THREE.AmbientLight('#111111');
   scene.add(ambientLight);
 
   // 点光源
-  spotLight = new THREE.PointLight('#ffffff', 1, 450, 1);
+  let spotLight = new THREE.PointLight('#ffffff', 1, 450, 1);
   spotLight.position.set(100, 100, 100);
 
   //告诉平行光需要开启阴影投射
@@ -226,10 +225,11 @@ const createNodeGroup = (width: number, height: number) => {
 };
 
 function initModel() {
-  //辅助工具
-  var helper = new THREE.AxesHelper(40);
-  scene.add(helper);
-
+  if (process.env.NODE_ENV === 'development') {
+    //辅助工具
+    var helper = new THREE.AxesHelper(40);
+    scene.add(helper);
+  }
   //底部平面
   var planeGeometry = new THREE.PlaneGeometry(1000, 1000, 20, 20);
   var planeMaterial = new THREE.MeshPhongMaterial({ color: 0xaaaaaa });
@@ -371,10 +371,10 @@ async function draw() {
   let maxServiceLen = 0;
   Object.values(groups).forEach((value) => (maxServiceLen = Math.max(maxServiceLen, value.length)));
   const planeWidth = maxServiceLen * 25;
-  const entries = Object.entries(groups)
+  const entries = Object.entries(groups);
   entries.forEach(([key, value], i) => {
     const plane = createNodeGroup(planeWidth, 30);
-    plane.position.z = -i * 40 + (entries.length * 20) /2;
+    plane.position.z = -i * 40 + (entries.length * 20) / 2;
     const text = createText(font, '#fff', `service: ${key}`, 1.5, {
       x: -35,
       y: 0.2,
@@ -399,7 +399,9 @@ async function draw() {
   initLight();
   initModel();
   initControls();
-  initStats();
+  if (process.env.NODE_ENV === 'development') {
+    initStats();
+  }
 
   animate();
   window.onresize = onWindowResize;
