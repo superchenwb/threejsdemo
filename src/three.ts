@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import _ from 'lodash';
+import TWEEN from '@tweenjs/tween.js';
 import AnyStats from 'three/examples/jsm/libs/stats.module';
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment';
 
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 import { Font, FontLoader } from 'three/examples/jsm/loaders/FontLoader';
@@ -354,16 +355,192 @@ const list = [
     },
   },
 ];
+
 let updates: Function[] = [];
 function animate() {
+  const dt = clock.getDelta();
   const timer = 0.0001 * Date.now();
   //更新控制器
   render();
-
+  TWEEN.update();
   controls.update();
-  updates.forEach((fn) => fn(timer));
+  updates.forEach((fn) => fn(timer, dt));
 
   requestAnimationFrame(animate);
+}
+
+const loaderGltf = async (url: string) => {
+  const loader = new GLTFLoader();
+  return new Promise<GLTF>((resolve, reject) => {
+    loader.load(url, resolve, undefined, reject);
+  });
+};
+const clock = new THREE.Clock();
+
+var points: THREE.Vector3[] = [];
+// 初始化线路
+function initLine() {
+  var pArr = [
+    {
+      x: 0,
+      y: 0,
+      z: 50,
+    },
+    {
+      x: 50,
+      y: 0,
+      z: 50,
+    },
+    {
+      x: 50,
+      y: 0,
+      z: 10,
+    },
+    {
+      x: -50,
+      y: 0,
+      z: 10,
+    },
+    {
+      x: -50,
+      y: 0,
+      z: -30,
+    },
+    {
+      x: 50,
+      y: 0,
+      z: -30,
+    },
+    {
+      x: 50,
+      y: 0,
+      z: -70,
+    },
+    {
+      x: -50,
+      y: 0,
+      z: -70,
+    },
+    {
+      x: -50,
+      y: 0,
+      z: -30,
+    },
+    {
+      x: 50,
+      y: 0,
+      z: -30,
+    },
+    {
+      x: 50,
+      y: 0,
+      z: 10,
+    },
+    {
+      x: -50,
+      y: 0,
+      z: 10,
+    },
+    {
+      x: -50,
+      y: 0,
+      z: 50,
+    },
+    {
+      x: 0,
+      y: 0,
+      z: 50,
+    },
+  ];
+
+  for (var i = 0; i < pArr.length; i++) {
+    var randomX = pArr[i].x;
+    var randomY = pArr[i].y;
+    var randomZ = pArr[i].z;
+    var vector = new THREE.Vector3(randomX, randomY, randomZ);
+    points.push(vector);
+  }
+  // var geometry = new THREE.BufferGeometry();
+  // geometry.setFromPoints(points);
+  // var material = new THREE.LineBasicMaterial({
+  //   color: 0xff0000,
+  // });
+  // var line = new THREE.Line(geometry, material);
+  // line.position.y = 4;
+  // scene.add(line);
+  return points;
+}
+
+async function createRobot() {
+  const gltf = await loaderGltf('models/gltf/RobotExpressive/RobotExpressive.glb');
+  const model = gltf.scene;
+  model.scale.set(2, 2, 2);
+  model.translateY(0);
+  model.position.x = 0;
+  model.position.z = 50;
+  const mixer = new THREE.AnimationMixer(model);
+  updates.push((t: number, dt: number) => {
+    mixer.update(dt);
+  });
+  const actions: Record<string, any> = {};
+  const states = ['Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing'];
+  const emotes = ['Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp'];
+
+  for (let i = 0; i < gltf.animations.length; i++) {
+    const clip = gltf.animations[i];
+    const action = mixer.clipAction(clip);
+    actions[clip.name] = action;
+
+    if (emotes.indexOf(clip.name) >= 0 || states.indexOf(clip.name) >= 4) {
+      action.clampWhenFinished = true;
+      action.loop = THREE.LoopOnce;
+    }
+  }
+
+  var i = 0;
+  function tweenComplete() {
+    if (i < points.length) {
+      switch (i) {
+        case 0:
+        case 1:
+        case 2:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 11:
+        case 12:
+          model.rotateY(0.5 * Math.PI);
+          break;
+        case 3:
+        case 4:
+        case 9:
+        case 10:
+        case 13:
+        case 14:
+          model.rotateY(-0.5 * Math.PI);
+          break;
+      }
+      if (points[i + 1]) {
+        new TWEEN.Tween(points[i])
+          .to(points[i + 1], 4000)
+          .easing(TWEEN.Easing.Linear.None)
+          .onUpdate(function (object) {
+            model.position.set(object.x, object.y, object.z);
+          })
+          .onComplete(tweenComplete)
+          .start();
+        i++;
+      } else {
+        actions['Walking'].fadeOut(0.2)
+        actions['Sitting'].play();
+      }
+    }
+  }
+  tweenComplete();
+
+  scene.add(model);
+  actions['Walking'].play();
 }
 
 async function draw() {
@@ -402,6 +579,9 @@ async function draw() {
   initCamera();
   initLight();
   initModel();
+  initLine();
+  await createRobot();
+
   initControls();
   if (process.env.NODE_ENV === 'development') {
     const { update } = initStats();
