@@ -978,7 +978,7 @@ const createHost3 = () => {
 const controls = new OrbitControls(camera, renderer.domElement);
 
 //controls.update() must be called after any manual changes to the camera's transform
-camera.position.set(0, 10, 40);
+camera.position.set(10, 20, 40);
 
 function animate() {
   requestAnimationFrame(animate);
