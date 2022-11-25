@@ -67,7 +67,7 @@ const getFont = async () => {
   if (font) return font;
   const loader = new FontLoader();
   font = await new Promise((resolve, reject) => {
-    loader.load('fonts/helvetiker_regular.typeface.json', resolve);
+    loader.load('./fonts/helvetiker_regular.typeface.json', resolve);
   });
 };
 
@@ -91,7 +91,7 @@ const createDatabaseNode = () => {
   const color = '#444';
   const node = createBaseNode(color);
   // 加载一个资源
-  const texture = loader.load('/images/data.png');
+  const texture = loader.load('./images/data.png');
   (node.material as THREE.MeshBasicMaterial[])[2] = new THREE.MeshBasicMaterial({
     color,
     map: texture,
@@ -327,7 +327,7 @@ const createDatabaseGroup = () => {
     .lineTo(2.2, 0.8)
     .lineTo(2.2, 0)
     .lineTo(0, 0);
-  const texture = loader.load('/images/server.png');
+  const texture = loader.load('./images/server.png');
   const mesh2 = createBasePlane(shape2, '#111', -1.5, 0, 1.5, 0.5 * Math.PI, 0, 0, texture);
   mesh2.position.y = 0.06;
   group.add(mesh2);
@@ -359,7 +359,7 @@ const createGatewayNode = () => {
   const color = '#444';
   const node = createBaseNode(color, SIZE, 0.5);
   // 加载一个资源
-  const texture = loader.load('/images/gateway.png');
+  const texture = loader.load('./images/gateway.png');
   (node.material as THREE.MeshBasicMaterial[])[2] = new THREE.MeshBasicMaterial({
     color,
     map: texture,
@@ -473,7 +473,7 @@ const createGround = () => {
   const geometry = new THREE.BoxGeometry(groundWidth, groundHeight, 0.1);
   const material = new THREE.MeshBasicMaterial({ color: '#fff' });
   const plane = new THREE.Mesh(geometry, material);
-  loader.load('/images/grid.png', function (texture) {
+  loader.load('./images/grid.png', function (texture) {
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(groundWidth, groundHeight);
@@ -708,7 +708,7 @@ function addShape(
 
   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   const normal = new THREE.MeshBasicMaterial({ color: color });
-  const branchPng = loader.load('/images/branch.png');
+  const branchPng = loader.load('./images/branch.png');
   const mesh = new THREE.Mesh(geometry, [
     new THREE.MeshBasicMaterial({ color: color, map: branchPng }),
     normal,
@@ -799,7 +799,7 @@ const createHost = () => {
 
   const node = createBaseNode('#eee', SIZE, 0.5);
   // 加载一个资源
-  const texture = loader.load('/images/m4.png');
+  const texture = loader.load('./images/m4.png');
   (node.material as THREE.MeshBasicMaterial[])[2] = new THREE.MeshBasicMaterial({
     color: '#eee',
     map: texture,
@@ -853,7 +853,7 @@ const createHost2 = () => {
 
   const node = createBaseNode('#eee', SIZE, 0.5);
   // 加载一个资源
-  const texture = loader.load('/images/m4.png');
+  const texture = loader.load('./images/m4.png');
   (node.material as THREE.MeshBasicMaterial[])[2] = new THREE.MeshBasicMaterial({
     color: '#eee',
     map: texture,
@@ -865,7 +865,7 @@ const createHost2 = () => {
     const group = new THREE.Group();
     const node = createBaseNode('#eee', SIZE, 0.5);
     // 加载一个资源
-    const texture = loader.load('/images/c3.png');
+    const texture = loader.load('./images/c3.png');
     (node.material as THREE.MeshBasicMaterial[])[2] = new THREE.MeshBasicMaterial({
       color: '#eee',
       map: texture,
@@ -953,7 +953,7 @@ const createHost3 = () => {
 
   const node = createBaseNode('#eee', SIZE * 1.3, 1);
   // 加载一个资源
-  const texture = loader.load('/images/m4.png');
+  const texture = loader.load('./images/m4.png');
   (node.material as THREE.MeshBasicMaterial[])[2] = new THREE.MeshBasicMaterial({
     color: '#eee',
     map: texture,
